@@ -25,10 +25,10 @@ class JitWaitViewController: UIViewController {
   private func requestJITFromStikDebug() {
     let manager = JitManager.shared()
 
-    guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
-      manager.acquisitionError = "Could not determine the DolphiniOS bundle identifier."
-      return
-    }
+    // SideStore appends the free provisioning team ID to the installed
+    // bundle identifier. StikDebug must receive this full installed ID so
+    // it can bring the already-running DolphiniOS process back to the front.
+    let bundleIdentifier = "me.oatmealdome.dolphinios-njb.7BPRV54685"
 
     var components = URLComponents()
     components.scheme = "stikdebug"
