@@ -1,6 +1,8 @@
 name: Revo Direct Launch IPA
 
 on:
+  push:
+    branches: [ revo-direct-launch ]
   workflow_dispatch:
   pull_request:
     branches: [ master ]
