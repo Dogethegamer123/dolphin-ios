@@ -39,6 +39,7 @@ jobs:
             -scheme 'DiOS (NJB)' \
             DOL_PBID_ORGANIZATION_IDENTIFIER="me.oatmealdome" \
             DOL_BUILD_SOURCE="development" \
+            DOL_APP_ICON_ASSET_NAME=AppIcon \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
