@@ -14,8 +14,46 @@ class JitWaitViewController: UIViewController {
     
     self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(checkJit), userInfo: nil, repeats: true)
     
-    JitManager.shared().acquireJitByAltServer()
-    JitManager.shared().acquireJitByJitStreamer()
+    if #available(iOS 26.0, *) {
+      self.requestJITFromStikDebug()
+    } else {
+      JitManager.shared().acquireJitByAltServer()
+      JitManager.shared().acquireJitByJitStreamer()
+    }
+  }
+
+  private func requestJITFromStikDebug() {
+    let manager = JitManager.shared()
+
+    guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+      manager.acquisitionError = "Could not determine the DolphiniOS bundle identifier."
+      return
+    }
+
+    var components = URLComponents()
+    components.scheme = "stikdebug"
+    components.host = "enable-jit"
+    components.queryItems = [
+      URLQueryItem(name: "bundle-id", value: bundleIdentifier),
+      URLQueryItem(name: "pid", value: String(ProcessInfo.processInfo.processIdentifier))
+    ]
+
+    if manager.deviceHasTxm {
+      components.queryItems?.append(
+        URLQueryItem(name: "script-name", value: "legacy.js")
+      )
+    }
+
+    guard let url = components.url else {
+      manager.acquisitionError = "Could not create the StikDebug JIT request."
+      return
+    }
+
+    UIApplication.shared.open(url, options: [:]) { success in
+      if !success {
+        manager.acquisitionError = "StikDebug could not be opened. Make sure StikDebug is installed."
+      }
+    }
   }
   
   override func viewWillAppear(_ animated: Bool) {
