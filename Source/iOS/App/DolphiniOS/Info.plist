@@ -68,7 +68,7 @@
 			<string>Skylander Dumps</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<LSHandlerRank</key>
+			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
