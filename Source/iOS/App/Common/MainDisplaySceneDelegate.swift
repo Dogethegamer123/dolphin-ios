@@ -5,29 +5,49 @@ import UIKit
 
 class MainDisplaySceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
-  
+
+  private func handleLaunchURL(_ url: URL) {
+    guard url.scheme == "dolphinios",
+          url.host == "play",
+          url.path == "/mariogalaxy" else {
+      return
+    }
+
+    UserDefaults.standard.set(true, forKey: "DOLaunchSuperMarioGalaxy")
+    NotificationCenter.default.post(name: Notification.Name("DOLaunchSuperMarioGalaxy"), object: nil)
+  }
+
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     MainSceneCoordinator.shared().mainScene = scene as? UIWindowScene
+
+    if let url = connectionOptions.urlContexts.first?.url {
+      handleLaunchURL(url)
+    }
   }
-  
+
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    handleLaunchURL(url)
+  }
+
   func sceneDidDisconnect(_ scene: UIScene) {
     MainSceneCoordinator.shared().mainScene = nil
   }
-  
+
   func sceneDidBecomeActive(_ scene: UIScene) {
     ServiceManager.shared.applicationDidBecomeActive()
-    
+
     BootNoticeManager.shared().presentToSceneIfNecessary()
   }
-  
+
   func sceneWillResignActive(_ scene: UIScene) {
     ServiceManager.shared.applicationWillResignActive()
   }
-  
+
   func sceneWillEnterForeground(_ scene: UIScene) {
     //
   }
-  
+
   func sceneDidEnterBackground(_ scene: UIScene) {
     ServiceManager.shared.applicationDidEnterBackground()
   }

@@ -1,0 +1,61 @@
+name: Revo Direct Launch IPA
+
+on:
+  push:
+    branches: [ revo-direct-launch ]
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "Source/iOS/**"
+      - ".github/workflows/revo-direct-launch-ipa.yml"
+
+jobs:
+  build-unsigned-ipa:
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build utilities
+        run: |
+          brew install cmake ninja bartycrouch
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install polib
+
+      - name: Build non-jailbroken iOS app
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project Source/iOS/App/DolphiniOS.xcodeproj \
+            -derivedDataPath "${{ github.workspace }}/build-Xcode" \
+            -archivePath "${{ github.workspace }}/archives/NonJailbroken.xcarchive" \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -configuration 'Release (Non-Jailbroken)' \
+            -scheme 'DiOS (NJB)' \
+            DOL_PBID_ORGANIZATION_IDENTIFIER="me.oatmealdome" \
+            DOL_BUILD_SOURCE="development" \
+            DOL_APP_ICON_ASSET_NAME=AppIcon \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Package unsigned IPA for sideloading
+        run: |
+          APP="${{ github.workspace }}/archives/NonJailbroken.xcarchive/Products/Applications/DolphiniOS.app"
+          test -d "$APP"
+          mkdir -p "${{ github.workspace }}/ipa/Payload"
+          cp -R "$APP" "${{ github.workspace }}/ipa/Payload/"
+          cd "${{ github.workspace }}/ipa"
+          /usr/bin/zip -qry "${{ github.workspace }}/DolphiniOS-Unsigned.ipa" Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DolphiniOS-Unsigned-IPA
+          path: DolphiniOS-Unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7

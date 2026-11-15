@@ -6,6 +6,17 @@
 	<string>NotSet</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>me.oatmealdome.dolphinios.launch</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>dolphinios</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
